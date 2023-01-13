@@ -16,7 +16,7 @@ def find_all_plot(xs, wys, *, i_path: Path, detrend=False):
     _detr_str = "detrend "
     freqs = _get_freqs(wys)
 
-    modes = find_mode(wys, freqs, nmax=2)
+    modes = find_mode(wys, freqs, nmax=1)
     med = find_med(freqs)
     print(f"jk: {jk(wys)}")
     print(f"med: {med}")
@@ -63,24 +63,14 @@ def find_all_plot(xs, wys, *, i_path: Path, detrend=False):
     plt.show()
 
 
-def lab3_ext(d_path: Path, w_path: Path, *, i_path: Path, tol=1.9 * 1e-4):
+def lab3_ext(d_path: Path, w_path: Path, *, i_path: Path, tol=1e-4):
     ys = load_data(d_path)
     xs = np.arange(len(ys))
-    max_weight = np.max(load_weights(w_path))
-    low, high = ys - tol * max_weight, ys + tol * max_weight
+    B = np.loadtxt(w_path)
 
-    # pts = find_pts(xs, (low, high))
-    pts = [[7.98265896e-06, 2.35179375e-02], [1.63799716e-05, 2.20143629e-02], [7.54437870e-06, 2.22187311e-02],
-           [1.35555556e-05, 2.25538264e-02]]
-    *polys, = map(np.poly1d, pts)
-    pre_trend = np.zeros((len(polys), len(xs)))
-    for i, poly in enumerate(polys):
-        pre_trend[i] = poly(xs)
-    low_trend = np.min(pre_trend, axis=0)
-    high_trend = np.max(pre_trend, axis=0)
-
-    low_detrend = low - high_trend
-    high_detrend = high - low_trend
+    low, high = ys - tol, ys + tol
+    low_detrend = low - B * xs
+    high_detrend = high - B * xs
 
     plt.plot(xs, ys, label="orig")
     plt.legend()
@@ -133,14 +123,14 @@ def lab4_ext(predict_at, d_path: Path, w_path: Path, *, i_path: Path, tol=1.9 * 
 if __name__ == "__main__":
     cwd = Path(__file__).parent
     data_path = Path("./data/ch1_800nm_0.04.csv")
+    b_path = Path("./data/b.txt")
     weights_path = Path("./data/ch1_800nm_0.04.txt")
     imgs_path = Path("./imgs")
 
     if not imgs_path.exists():
         imgs_path.mkdir(parents=True, exist_ok=True)
 
-    # predict_at = (-10, 100.5, 1000)
     predict_at = (0, 101, 199)
 
-    # lab3_ext(cwd.joinpath(data_path), cwd.joinpath(weights_path), i_path=cwd.joinpath(imgs_path))
+    lab3_ext(cwd.joinpath(data_path), cwd.joinpath(b_path), i_path=cwd.joinpath(imgs_path))
     lab4_ext(predict_at, cwd.joinpath(data_path), cwd.joinpath(weights_path), i_path=cwd.joinpath(imgs_path))
