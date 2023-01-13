@@ -19,7 +19,7 @@ def _get_freqs(ys):
 def find_mode(ys, freqs, *, nmax=3):
     low, high = ys
     if max(low) <= min(high):
-        return np.array(max(low), min(high))
+        return np.array([max(low), min(high)]),
 
     zs = defaultdict(list)
     for pt, fr in freqs:

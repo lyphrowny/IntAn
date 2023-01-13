@@ -57,17 +57,19 @@ def lines_plot(xs, mys, polys, *, save_path: Path):
     plt.show()
 
 
-def predict_plot(pt, polys, *, save_path: Path, l=10, r=11, step=1):
+def predict_plot(xs, ys, pt, polys, *, save_path: Path, l=10, r=11, step=1):
     mi, *_, ma = sorted([poly(pt) for poly in polys])
     _xs = np.arange(pt - l, pt + r, step)
 
-    print(f"""y({pt}) = [{mi},\; {ma}] \\\\
-mid = {(mi + ma) / 2}, \; rad = {ma - mi}""")
+    print(f"""&y({pt}) = [{mi},\; {ma}] \\\\
+&mid = {(mi + ma) / 2}, \; rad = {ma - mi}""")
 
     for i, poly in enumerate(polys):
         plt.plot(_xs, poly(_xs), label=i)
+    plt.vlines(xs, *ys, colors="gray", linewidth=10, label="orig data")
+    # print(pt, ys)
     plt.vlines(pt, mi, ma, linestyle="dashed")
-    plt.scatter(pt, (mi + ma) / 2, facecolors="none", edgecolors="r", s=75, label=f"predicted at {pt}", lw=3)
+    plt.scatter(pt, (mi + ma) / 2, facecolors="none", edgecolors="r", s=75, label=f"predicted at {pt}", lw=3, zorder=100)
     ttl = f"prediction at {pt}"
     plt.title(ttl)
     plt.xlabel("n")
@@ -85,6 +87,7 @@ def plot_poly(pts, *, save_path: Path):
     ttl = "information set"
     plt.title(ttl)
     plt.xlabel("k")
+    plt.xticks(rotation=10)
     plt.ylabel("b")
     plt.savefig(save_path.joinpath(ttl))
     plt.show()
@@ -121,7 +124,7 @@ def lab4(predict_at, d_path: Path, w_path: Path, img_path: Path, tol=1e-4 * 1.9)
 
     print("predicted vals")
     for pt in predict_at:
-        predict_plot(pt, polys, save_path=img_path)
+        predict_plot(pt, [(ys - tol * max(weights))[pt], (ys + tol * max(weights))[pt]], pt, polys, save_path=img_path)
 
     plot_poly(pts, save_path=img_path)
 
@@ -136,5 +139,6 @@ if __name__ == "__main__":
         imgs_path.mkdir(parents=True, exist_ok=True)
 
     predict_at = (-10, 100.5, 1000)
+    predict_at = (0, 101, 199)
 
     lab4(predict_at, cwd.joinpath(data_path), cwd.joinpath(weights_path), imgs_path)
